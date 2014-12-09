@@ -2,6 +2,7 @@ precision mediump float;
 varying vec2 vTextureCoord;
 varying vec4 vColor;
 uniform float dist;
+uniform int tint;
 uniform sampler2D uSampler;
 
 const int SAMPLE = 3;
@@ -42,9 +43,20 @@ vec4 orig = texture2D(uSampler, vTextureCoord);
 	sum = mix(sum, vec4(grey, grey, grey, 1.0), dist * 2.0);
 
 	// blue tint
-	sum.x = clamp(sum.x * (1.4 - dist), 0.0, 1.0);
-	sum.y = clamp(sum.y * (1.4 - dist), 0.0, 1.0);
-	sum.z = clamp(sum.z + 0.2, 0.0, 1.0);
+	if(tint == 0)
+		sum.x = clamp(sum.x + 0.2, 0.0, 1.0);
+	else
+		sum.x = clamp(sum.x * (1.4 - dist), 0.0, 1.0);
+
+	if(tint == 1)
+		sum.y = clamp(sum.y + 0.2, 0.0, 1.0);
+	else
+		sum.y = clamp(sum.y * (1.4 - dist), 0.0, 1.0);
+
+	if(tint == 2)
+		sum.z = clamp(sum.z + 0.2, 0.0, 1.0);
+	else	
+		sum.z = clamp(sum.z * (1.4 - dist), 0.0, 1.0);
 
 	// darken
 	sum = mix(sum, vec4(0.0, 0.0, 0.0, 1.0), dist);

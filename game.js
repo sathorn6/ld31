@@ -676,6 +676,7 @@ Intro.prototype.create = function() {
     game.stage.backgroundColor = 0x000000;
     if(!rnormFilter) rnormFilter = game.add.filter("ReallyNormal");
     var bg = game.add.sprite(0, 0, 'bg');
+    document.body.removeChild(document.getElementById("loading"));
     
     rnormFilter.uniforms.dist.value = 0.5;
     bg.filters = [rnormFilter];
@@ -733,6 +734,10 @@ Outro.prototype.create = function() {
     if(!rnormFilter) rnormFilter = game.add.filter("ReallyNormal");
     var bg = game.add.sprite(0, 0, 'bg');
     rnormFilter.uniforms.dist.value = 0.7;
+    if(victory)
+        rnormFilter.uniforms.tint.value = 1;
+    else
+        rnormFilter.uniforms.tint.value = 0;
     bg.filters = [rnormFilter];
 
     this.t = 0;
