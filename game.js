@@ -47,6 +47,7 @@ function dist(a, b) {
 }
 function setupSound(sound) {
     var panner = sound.context.createPanner();
+    panner.panningModel = 'equalpower';
     sound.externalNode = panner;
     panner.connect(sound.gainNode);
 }
@@ -169,8 +170,8 @@ Human.prototype.live2 = function() {
     game.physics.arcade.collide(this.sprite, sms);
 
     if(player != soul && dist(this.sprite, player) < 80) {
-        var fleespeed = 72;
-        if(this.isAngry) fleespeed = 85;
+        var fleespeed = 68;
+        //if(this.isAngry) fleespeed = 75;
         this.panic = 60;
 
         var pos = vec2.from(this.sprite);
@@ -588,22 +589,27 @@ GameState.prototype.update = function() {
     meltBar.scale.x = ttl/120;
 
 
+    var dir = new vec2(0, 0);
     // Movement
     if (cursors.left.isDown) {
-        player.body.velocity.x = -speed;
+        dir.x = -speed;
     } else if (cursors.right.isDown) {
-        player.body.velocity.x = speed;
+        dir.x = speed;
     } else {
-        player.body.velocity.x = 0;
+        dir.x = 0;
     }
 
     if (cursors.up.isDown){
-        player.body.velocity.y = -speed;
+        dir.y = -speed;
     } else if (cursors.down.isDown){
-        player.body.velocity.y = speed;
+        dir.y = speed;
     } else {
-        player.body.velocity.y = 0;
+        dir.y = 0;
     }
+
+    dir = dir.norm().times(speed);
+    player.body.velocity.x = dir.x;
+    player.body.velocity.y = dir.y;
 
 
     // Action
@@ -624,7 +630,7 @@ GameState.prototype.update = function() {
             sms.remove(player);
             game.add.existing(player);
 
-            speed = 100;
+            speed = 105;
 
             emitter.kill();
             game.stage.filters = normFilter;
@@ -673,6 +679,10 @@ function Intro() {
 Intro.prototype.preload = GameState.prototype.preload;
 
 Intro.prototype.create = function() {
+    if(!(game.renderer instanceof PIXI.WebGLRenderer)) {
+        alert("Your game is running without WebGL. It will not look pretty.");
+    }
+
     game.stage.backgroundColor = 0x000000;
     if(!rnormFilter) rnormFilter = game.add.filter("ReallyNormal");
     var bg = game.add.sprite(0, 0, 'bg');
@@ -828,7 +838,3 @@ function ignore(event) {
 }
 
 document.addEventListener("keypress", ignore);
-
-if(navigator.userAgent.indexOf("Chrome") == -1) {
-    alert("The game doesn't work very well in non-Chrome browsers (yet). You should use Chrome to play it.")
-}
