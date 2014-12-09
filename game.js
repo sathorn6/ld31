@@ -5,24 +5,24 @@
 function GameState() {}
 
 GameState.prototype.preload = function() {
-    game.load.image('flake', '/assets/beautifulflake.png');
-    game.load.image('blood', '/assets/blood.png');
-    game.load.image('bg', '/assets/bg-3.png');
-    game.load.spritesheet('ss', '/assets/sms-1.png', 32, 32);
-    game.load.spritesheet('human', '/assets/human-3.png', 32, 32);
-    game.load.image('monad', '/assets/monad.png');
-    game.load.script('soul', '/filters/Soul.js');
-    game.load.text("soulshader", "/filters/shaders/Soul.fs");
-    game.load.script('normal', '/filters/Normal.js');
-    game.load.text("normalshader", "/filters/shaders/Normal.fs");
-    game.load.script('reallynormal', '/filters/ReallyNormal.js');
-    game.load.text("reallynormalshader", "/filters/shaders/ReallyNormal.fs");
-    game.load.audio('posess', '/assets/slurp2.wav');
-    game.load.audio('unposess', '/assets/exhale-1.wav');
-    game.load.audio('melt', '/assets/melt-1.wav');
-    game.load.audio('attack', '/assets/attack.wav');
-    game.load.audio('ambient', '/assets/soul.wav');
-    game.load.audio('ambientSoul', '/assets/actualrealsoul-1.wav');
+    game.load.image('flake', 'assets/beautifulflake.png');
+    game.load.image('blood', 'assets/blood.png');
+    game.load.image('bg', 'assets/bg-3.png');
+    game.load.spritesheet('ss', 'assets/sms-1.png', 32, 32);
+    game.load.spritesheet('human', 'assets/human-3.png', 32, 32);
+    game.load.image('monad', 'assets/monad.png');
+    game.load.script('soul', 'filters/Soul.js');
+    game.load.text("soulshader", "filters/shaders/Soul.fs");
+    game.load.script('normal', 'filters/Normal.js');
+    game.load.text("normalshader", "filters/shaders/Normal.fs");
+    game.load.script('reallynormal', 'filters/ReallyNormal.js');
+    game.load.text("reallynormalshader", "filters/shaders/ReallyNormal.fs");
+    game.load.audio('posess', 'assets/slurp2.wav');
+    game.load.audio('unposess', 'assets/exhale-1.wav');
+    game.load.audio('melt', 'assets/melt-1.wav');
+    game.load.audio('attack', 'assets/attack.wav');
+    game.load.audio('ambient', 'assets/soul.wav');
+    game.load.audio('ambientSoul', 'assets/actualrealsoul-1.wav');
 };
 
 var cursors, fpsText, ground, emitter, soul, explode, posess, unposess;
