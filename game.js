@@ -33,7 +33,7 @@ var soulFilter, normFilter, rnormFilter;
 
 var ambient, ambientSoul;
 
-var space;
+var space, useGamepad = false;
 
 var border = {
     top: 150,
@@ -415,7 +415,7 @@ function checkIfEnd() {
     ambientSoul.stop();
     ambient.stop();
     player = null;
-    game.stage.filters = null;
+    //game.stage.filters = null;
     game.state.start('outro', true);
 }
 
@@ -562,16 +562,11 @@ GameState.prototype.create = function() {
 
     cursors = game.input.keyboard.createCursorKeys();
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    space.onDown.add(function() {
-        if(player != soul) {
-            switchToSoul();
-        }
-    }, this);
-
 
     switchToSoul();
 };
 
+var SM_SPEED = 105;
 var speed = 300;
 
 GameState.prototype.update = function() {
@@ -589,28 +584,49 @@ GameState.prototype.update = function() {
     meltBar.scale.x = ttl/120;
 
 
+    // Input
+
     var dir = new vec2(0, 0);
-    // Movement
-    if (cursors.left.isDown) {
-        dir.x = -speed;
-    } else if (cursors.right.isDown) {
-        dir.x = speed;
+    if(!useGamepad) {
+        if(player != soul && space.isDown) {
+            switchToSoul();
+        }
+
+        if (cursors.left.isDown) {
+            dir.x = -speed;
+        } else if (cursors.right.isDown) {
+            dir.x = speed;
+        } else {
+            dir.x = 0;
+        }
+
+        if (cursors.up.isDown){
+            dir.y = -speed;
+        } else if (cursors.down.isDown){
+            dir.y = speed;
+        } else {
+            dir.y = 0;
+        }
+
+        dir = dir.norm().times(speed);
     } else {
-        dir.x = 0;
+        if(player != soul && useGamepad.isDown(0)) {
+            switchToSoul();
+        }
+
+        var xaxis = useGamepad.axis(0);
+        var yaxis = useGamepad.axis(1);
+
+        dir.x = xaxis * speed;
+        dir.y = yaxis * speed;
+
+        if(dir.len() > speed) {
+            dir = dir.norm().times(speed);
+        }
     }
 
-    if (cursors.up.isDown){
-        dir.y = -speed;
-    } else if (cursors.down.isDown){
-        dir.y = speed;
-    } else {
-        dir.y = 0;
-    }
-
-    dir = dir.norm().times(speed);
     player.body.velocity.x = dir.x;
     player.body.velocity.y = dir.y;
-
 
     // Action
 
@@ -630,7 +646,7 @@ GameState.prototype.update = function() {
             sms.remove(player);
             game.add.existing(player);
 
-            speed = 105;
+            speed = SM_SPEED;
 
             emitter.kill();
             game.stage.filters = normFilter;
@@ -662,6 +678,7 @@ GameState.prototype.update = function() {
 
     game.stage.filters[0].uniforms.posX.value = emitter.x;
     game.stage.filters[0].uniforms.posY.value = emitter.y;
+
 
     checkIfEnd();
 };
@@ -721,10 +738,18 @@ Intro.prototype.update = function() {
         this.text4 = game.add.text(640, 480, 'How to play:', { font: '30px Arial', fill: '#ffffff' });
         this.text4.anchor.x = 0.5;
     }
-    if(this.t == step*7) this.text4.setText('Move with arrow keys.');
+    if(this.t == step*7)
+        if(useGamepad)
+            this.text4.setText('Move with left stick.');
+        else
+            this.text4.setText('Move with arrow keys.');
     if(this.t == step*8) this.text4.setText('Move into snowman to control.');
     if(this.t == step*9) this.text4.setText('Move snowman into human to kill.');
-    if(this.t == step*10) this.text4.setText('Melt your snowman with SPACE.');
+    if(this.t == step*10)
+        if(useGamepad)
+            this.text4.setText('Melt your snowman with A.');
+        else
+            this.text4.setText('Melt your snowman with SPACE.');
     if(this.t == step*11) {
         this.text5 = game.add.text(640, 540, 'Good luck.', { font: '30px Arial', fill: '#ffffff' });
         this.text5.anchor.x = 0.5;
@@ -741,6 +766,7 @@ function Outro() {
 
 Outro.prototype.create = function() {
     game.stage.backgroundColor = 0x000000;
+    game.stage.filters = null;
     if(!rnormFilter) rnormFilter = game.add.filter("ReallyNormal");
     var bg = game.add.sprite(0, 0, 'bg');
     rnormFilter.uniforms.dist.value = 0.7;
@@ -761,7 +787,12 @@ Outro.prototype.update = function() {
         this.text1.anchor.x = 0.5;
 
         if(wasInOutro) {
-            var info = game.add.text(640, 666, 'Press SPACE to skip.', { font: '11px Arial', fill: '#ffffff' });
+            var info;
+            if(useGamepad)
+                info = game.add.text(640, 666, 'Press A to skip.', { font: '11px Arial', fill: '#ffffff' });
+            else
+                info = game.add.text(640, 666, 'Press SPACE to skip.', { font: '11px Arial', fill: '#ffffff' });
+
             info.anchor.x = 0.5;
         }
     }
@@ -788,7 +819,7 @@ Outro.prototype.update = function() {
         this.text5 = game.add.text(640, 360, 'Good luck.', { font: '30px Arial', fill: '#ffffff' });
         this.text5.anchor.x = 0.5;
     }
-    if(this.t++ > step*8 || (this.t > 98 && space.isDown) ){
+    if(this.t++ > step*8 || (this.t > 98 && (space.isDown || (useGamepad && useGamepad.isDown(0)))) ){
         game.state.start('game', true);
         wasInOutro = true;
     }
@@ -798,6 +829,7 @@ Outro.prototype.update = function() {
 // Start the game
 
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game');
+
 game.state.add('intro', Intro, true);
 game.state.add('game', GameState);
 game.state.add('outro', Outro);
@@ -822,11 +854,32 @@ document.getElementById("fs").addEventListener("click", function() {
     }
 });
 document.getElementById("pause").addEventListener("click", function() {
-    game.paused = true;
+    if(!game.paused) {
+        game.paused = true;
+        this.innerHTML = "Unpause";
+    } else {
+        game.paused = false;
+        this.innerHTML = "Pause";
+    }
 });
-document.getElementById("play").addEventListener("click", function() {
-    game.paused = false;
-});
+
+if(navigator.getGamepads || navigator.webkitGetGamepads || navigator.webkitGamepads) {
+    document.getElementById("gamepad").disabled = false;
+    document.getElementById("gamepad").addEventListener("click", function() {
+        if(!useGamepad) {
+            game.input.gamepad.start();
+            useGamepad = game.input.gamepad.pad1;
+            this.innerHTML = "Use keyboard";
+            document.getElementById("help").innerHTML = "Move with left stick. - Melt snowman with A.";
+        } else {
+            game.input.gamepad.stop();
+            useGamepad = null;
+            this.innerHTML = "Use gamepad";
+            document.getElementById("help").innerHTML = "Move with arrow keys. - Melt snowman with SPACE.";
+        }
+    });
+}
+
 window.addEventListener("blur", function() {
     //game.paused = true;
 });
